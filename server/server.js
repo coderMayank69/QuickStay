@@ -196,10 +196,34 @@ connectDB()
     .then(() => {
         server.listen(PORT, () => {
             console.log(`🚀 YoYo server on port ${PORT}`);
-            console.log(`⚡ Socket.io ready`);
+            console.log(`✅ Socket.io ready`);
             startScheduler(); // Start cron jobs after DB is connected
         });
     })
     .catch(() => process.exit(1));
+
+// ─────────────────────────────────────────────
+// GRACEFUL SHUTDOWN — handles AWS SIGTERM + Ctrl-C
+// ─────────────────────────────────────────────
+const shutdown = async (signal) => {
+    console.log(`\n[Server] ${signal} received — shutting down gracefully…`);
+    server.close(async () => {
+        try {
+            await mongoose.disconnect();
+            console.log('[Server] MongoDB disconnected. Exiting cleanly.');
+        } catch (err) {
+            console.error('[Server] Error during shutdown:', err.message);
+        }
+        process.exit(0);
+    });
+    // Force-exit if not done within 10 seconds
+    setTimeout(() => {
+        console.error('[Server] Graceful shutdown timed out — forcing exit.');
+        process.exit(1);
+    }, 10_000);
+};
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT',  () => shutdown('SIGINT'));
 
 export default app;
