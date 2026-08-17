@@ -1,5 +1,5 @@
 /**
- * aiController.js — "Maya" AI assistant powered by Groq API
+ * aiController.js — "Maya" AI assistant powered by Google Gemini
  *
  * Endpoints:
  *   POST /api/ai/chat          → Conversational assistant (Maya)
@@ -7,46 +7,25 @@
  *   GET  /api/ai/review-summary/:hotelId → AI digest of reviews
  */
 
-import Groq    from 'groq-sdk';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import Booking from '../models/Booking.js';
 import Review  from '../models/Review.js';
 import { ok, fail } from '../utils/respond.js';
 
-// ── Current fast model (llama3-8b-8192 was decommissioned June 2025) ──
-const GROQ_MODEL = 'llama-3.1-8b-instant';
+const GEMINI_MODEL = 'gemini-1.5-flash';
 
-// ── Dual-key Groq clients with automatic fallback ──────────────────
-let _groqPrimary   = null;
-let _groqFallback  = null;
-
-const getGroq = () => {
-    const key1 = process.env.GROQ_API_KEY;
-    const key2 = process.env.GROQ_API_KEY_2;
-    if (!key1 && !key2) throw new Error('No GROQ_API_KEY configured in server/.env');
-    if (!_groqPrimary  && key1) _groqPrimary  = new Groq({ apiKey: key1 });
-    if (!_groqFallback && key2) _groqFallback = new Groq({ apiKey: key2 });
-    return _groqPrimary || _groqFallback;
-};
-
-// Runs a Groq request, retrying on the fallback key if the primary fails
-const groqRequest = async (params) => {
-    const key2 = process.env.GROQ_API_KEY_2;
-    try {
-        return await getGroq().chat.completions.create(params);
-    } catch (err) {
-        if (key2 && _groqFallback && _groqFallback !== getGroq()) {
-            console.warn('[AI] Primary Groq key failed, trying fallback key:', err.message);
-            return await _groqFallback.chat.completions.create(params);
-        }
-        // If primary IS the fallback, try the other one
-        if (key2 && _groqPrimary) {
-            console.warn('[AI] Trying fallback Groq key:', err.message);
-            if (!_groqFallback) _groqFallback = new Groq({ apiKey: key2 });
-            return await _groqFallback.chat.completions.create(params);
-        }
-        throw err;
+// ── Lazy-initialised Gemini client ───────────────────────────────
+let _genAI = null;
+const getGenAI = () => {
+    if (!_genAI) {
+        const key = process.env.GEMINI_API_KEY;
+        if (!key) throw new Error('GEMINI_API_KEY not configured');
+        _genAI = new GoogleGenerativeAI(key);
     }
+    return _genAI;
 };
+
+const getModel = () => getGenAI().getGenerativeModel({ model: GEMINI_MODEL });
 
 // ── System prompt — Maya's personality & knowledge ───────────────
 const MAYA_SYSTEM_PROMPT = `You are Maya, YoYo Rooms' friendly AI assistant — like Air India's Tia but for hotels.
@@ -99,31 +78,29 @@ export const aiChat = async (req, res) => {
         const { message, history = [], userId } = req.body;
         if (!message?.trim()) return fail(res, 'Message is required');
 
-        const messages = [
-            { role: 'system', content: MAYA_SYSTEM_PROMPT },
-            ...history.slice(-8).map(h => ({
-                role:    h.role === 'maya' ? 'assistant' : 'user',
-                content: h.content,
-            })),
-            { role: 'user', content: message.trim() },
-        ];
-
-        // Personalize with user's last booking (best-effort, silent on failure)
+        // Build system context (optionally enriched with user's last booking)
+        let systemContext = MAYA_SYSTEM_PROMPT;
         if (userId) {
             try {
                 const b = await Booking.findOne({ user: userId }).sort({ createdAt: -1 }).populate('room hotel').lean();
-                if (b) messages[0].content += `\n[Context: User's last booking: ${b._id}, ${b.room?.roomType} at ${b.hotel?.name}, status: ${b.status}]`;
+                if (b) systemContext += `\n[Context: User's last booking: ${b._id}, ${b.room?.roomType} at ${b.hotel?.name}, status: ${b.status}]`;
             } catch (_) {}
         }
 
-        const completion = await groqRequest({
-            model: GROQ_MODEL,
-            messages,
-            max_tokens: 200,
-            temperature: 0.7,
+        // Map history to Gemini's Content format
+        const geminiHistory = history.slice(-8).map(h => ({
+            role:  h.role === 'maya' ? 'model' : 'user',
+            parts: [{ text: h.content }],
+        }));
+
+        const model = getModel();
+        const chat  = model.startChat({
+            systemInstruction: systemContext,
+            history: geminiHistory,
         });
 
-        const reply = completion.choices[0]?.message?.content?.trim() || "I'm having a moment — please try again!";
+        const result = await chat.sendMessage(message.trim());
+        const reply  = result.response.text()?.trim() || "I'm having a moment — please try again!";
         ok(res, { reply, quickReplies: getQuickReplies(message) });
 
     } catch (error) {
@@ -160,14 +137,10 @@ Rules:
 - roomType must exactly match one allowed value or null
 - category must exactly match one allowed value or null`;
 
-        const completion = await groqRequest({
-            model: GROQ_MODEL,
-            messages: [{ role: 'user', content: prompt }],
-            max_tokens: 180,
-            temperature: 0.1,
-        });
+        const model  = getModel();
+        const result = await model.generateContent(prompt);
+        const raw    = result.response.text()?.trim() || '{}';
 
-        const raw       = completion.choices[0]?.message?.content?.trim() || '{}';
         const jsonMatch = raw.match(/\{[\s\S]*\}/);
         const filters   = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
 
@@ -197,16 +170,12 @@ export const reviewSummary = async (req, res) => {
 
         const reviewText = reviews.map(r => `Rating: ${r.rating}/5 - "${r.comment}"`).join('\n');
 
-        const completion = await groqRequest({
-            model: GROQ_MODEL,
-            messages: [{ role: 'user', content: `Summarize these hotel reviews in 2-3 concise sentences.\nMention what guests love most, any common complaint, and overall sentiment.\nBe specific, not generic. Flowing prose only, no bullet points.\n\nReviews:\n${reviewText}` }],
-            max_tokens: 150,
-            temperature: 0.4,
-        });
+        const model  = getModel();
+        const result = await model.generateContent(
+            `Summarize these hotel reviews in 2-3 concise sentences.\nMention what guests love most, any common complaint, and overall sentiment.\nBe specific, not generic. Flowing prose only, no bullet points.\n\nReviews:\n${reviewText}`
+        );
 
-        const summary = completion.choices[0]?.message?.content?.trim()
-            || 'Guests have had a great experience at this property.';
-
+        const summary = result.response.text()?.trim() || 'Guests have had a great experience at this property.';
         summaryCache.set(hotelId, { summary, cachedAt: Date.now() });
         ok(res, { summary, reviewCount: reviews.length });
 

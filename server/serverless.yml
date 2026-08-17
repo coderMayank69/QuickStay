@@ -30,8 +30,7 @@ provider:
     STRIPE_PUBLISHABLE_KEY: ${ssm:/yoyo/prod/STRIPE_PUBLISHABLE_KEY}
     STRIPE_SECRET_KEY:     ${ssm:/yoyo/prod/STRIPE_SECRET_KEY}
     STRIPE_WEBHOOK_SECRET: ${ssm:/yoyo/prod/STRIPE_WEBHOOK_SECRET}
-    GROQ_API_KEY:          ${ssm:/yoyo/prod/GROQ_API_KEY}
-    GROQ_API_KEY_2:        ${ssm:/yoyo/prod/GROQ_API_KEY_2}
+    GEMINI_API_KEY:          ${ssm:/yoyo/prod/GEMINI_API_KEY}
 
   iam:
     role:

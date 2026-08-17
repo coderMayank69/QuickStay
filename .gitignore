@@ -9,13 +9,19 @@ node_modules/
 AI_CONTEXT.md
 .pnp.js
 
-# Environment variables — NEVER commit these
+# .env.production is committed intentionally — VITE_ vars are PUBLIC (baked into JS bundle)
+# Real secrets live server-side in AWS SSM, never here
+
+# All other .env files have real secrets — never commit
 .env
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
-.env.production
+server/.env
+server/.env.*
+# Allow client/.env.production (only public VITE_ vars, safe for Vercel build)
+!client/.env.production
 
 # Build output
 dist/
