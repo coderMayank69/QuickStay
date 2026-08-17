@@ -1,0 +1,88 @@
+# serverless.yml — AWS Lambda deployment config for YoYo backend
+# Deploy with: npx serverless deploy --stage prod
+
+service: yoyo-backend
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  region: ap-south-1          # Mumbai — closest to Indian users
+  stage: ${opt:stage, 'prod'}
+  architecture: arm64          # Graviton2 — 20% cheaper, faster cold starts
+
+  # Memory & timeout
+  memorySize: 512              # MB — enough for Express + Mongoose + Stripe
+  timeout: 29                  # seconds (API Gateway max = 29s)
+
+  # Lambda environment variables
+  # Set secrets via: npx serverless --param="MONGODB_URL=..." or AWS SSM
+  environment:
+    NODE_ENV:              production
+    MONGODB_URL:           ${ssm:/yoyo/prod/MONGODB_URL}
+    JWT_SECRET:            ${ssm:/yoyo/prod/JWT_SECRET}
+    JWT_REFRESH_SECRET:    ${ssm:/yoyo/prod/JWT_REFRESH_SECRET}
+    PASSWORD_PEPPER:       ${ssm:/yoyo/prod/PASSWORD_PEPPER}
+    GOOGLE_CLIENT_ID:      ${ssm:/yoyo/prod/GOOGLE_CLIENT_ID}
+    ALLOWED_ORIGINS:       ${ssm:/yoyo/prod/ALLOWED_ORIGINS}
+    CLOUDINARY_CLOUD_NAME: ${ssm:/yoyo/prod/CLOUDINARY_CLOUD_NAME}
+    CLOUDINARY_API_KEY:    ${ssm:/yoyo/prod/CLOUDINARY_API_KEY}
+    CLOUDINARY_API_SECRET: ${ssm:/yoyo/prod/CLOUDINARY_API_SECRET}
+    SENDER_EMAIL:          ${ssm:/yoyo/prod/SENDER_EMAIL}
+    SMTP_USER:             ${ssm:/yoyo/prod/SMTP_USER}
+    SMTP_PASS:             ${ssm:/yoyo/prod/SMTP_PASS}
+    STRIPE_PUBLISHABLE_KEY: ${ssm:/yoyo/prod/STRIPE_PUBLISHABLE_KEY}
+    STRIPE_SECRET_KEY:     ${ssm:/yoyo/prod/STRIPE_SECRET_KEY}
+    STRIPE_WEBHOOK_SECRET: ${ssm:/yoyo/prod/STRIPE_WEBHOOK_SECRET}
+    GROQ_API_KEY:          ${ssm:/yoyo/prod/GROQ_API_KEY}
+    GROQ_API_KEY_2:        ${ssm:/yoyo/prod/GROQ_API_KEY_2}
+
+  # IAM permissions (only SSM read — principle of least privilege)
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - ssm:GetParameter
+            - ssm:GetParameters
+          Resource:
+            - arn:aws:ssm:ap-south-1:*:parameter/yoyo/prod/*
+
+# ── Lambda function ─────────────────────────────────────────────
+functions:
+  api:
+    handler: lambda.handler          # lambda.js → export const handler
+    description: YoYo Hotel Booking API
+    events:
+      # Catch-all HTTP route — API Gateway HTTP API (v2, cheaper + faster than REST API)
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+
+# ── Packaging ───────────────────────────────────────────────────
+package:
+  individually: false
+  patterns:
+    - '!node_modules/.cache/**'
+    - '!node_modules/aws-sdk/**'     # pre-installed on Lambda runtime
+    - '!*.test.js'
+    - '!**/*.test.js'
+    - '!addHotels.js'
+    - '!addCategoryHotels.js'
+    - '!seedData.js'
+    - '!uploadAssets.js'
+    - '!ecosystem.config.cjs'
+    - '!.env*'                       # never bundle secrets
+
+# ── Plugins ─────────────────────────────────────────────────────
+plugins:
+  - serverless-offline              # local Lambda emulation (dev only)
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+    lambdaPort: 3002

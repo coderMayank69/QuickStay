@@ -8,7 +8,12 @@
     "start": "node server.js",
     "upload-assets": "node uploadAssets.js",
     "seed": "node seedData.js",
-    "setup": "node uploadAssets.js && node seedData.js"
+    "setup": "node uploadAssets.js && node seedData.js",
+    "deploy": "serverless deploy --stage prod",
+    "deploy:dev": "serverless deploy --stage dev",
+    "offline": "serverless offline",
+    "logs": "serverless logs -f api --tail",
+    "remove": "serverless remove --stage prod"
   },
   "keywords": [],
   "author": "",
@@ -33,6 +38,7 @@
     "multer": "^2.0.2",
     "node-cron": "^4.2.1",
     "nodemailer": "^7.0.11",
+    "serverless-http": "^4.0.0",
     "socket.io": "^4.8.3",
     "stripe": "^20.1.0"
   },
@@ -40,6 +46,8 @@
     "@jest/globals": "^30.4.1",
     "jest": "^30.4.2",
     "mongodb-memory-server": "^11.2.0",
+    "serverless": "^4.41.0",
+    "serverless-offline": "^14.8.0",
     "supertest": "^7.2.2"
   }
 }
