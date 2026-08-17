@@ -45,3 +45,6 @@ Thumbs.db
 
 # Seed scripts — keep in repo for dev reference but don't deploy
 # (they're fine to commit, just excluded from vercel via vercel.json)
+
+# Serverless Framework deployment artifacts (large zip — never commit)
+.serverless/

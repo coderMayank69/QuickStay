@@ -1,4 +1,4 @@
-﻿import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { motion, AnimatePresence } from "framer-motion";
@@ -510,17 +510,18 @@ const Navbar = () => {
       </AnimatePresence>
 
       {/* -- Mobile bottom nav --------------------------- */}
-      <nav aria-label="Mobile navigation" className="sm:hidden fixed bottom-4 left-4 right-4 z-50">
+      <nav aria-label="Mobile navigation" className="sm:hidden fixed bottom-0 left-0 right-0 z-[60] px-4 pb-safe">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3, duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-          className="flex items-center justify-around py-3 px-6 rounded-2xl"
+          className="flex items-center justify-around py-3 px-6 mx-auto rounded-2xl mb-3"
           style={{
             background: "rgba(9,9,11,0.96)",
             backdropFilter: "blur(28px)",
             border: "1px solid rgba(255,255,255,0.09)",
             boxShadow: "0 8px 32px rgba(0,0,0,0.60)",
+            paddingBottom: "max(12px, env(safe-area-inset-bottom, 12px))",
           }}
         >
           {mobileLinks.map(l => {
@@ -548,6 +549,7 @@ const Navbar = () => {
           })}
         </motion.div>
       </nav>
+
     </>
   );
 };

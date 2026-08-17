@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Link, useLocation, Navigate } from "react-router-dom";
 import { useAppContext } from "../context/AppContext";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,13 +53,8 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [gLoading,setGLoading]= useState(false);
 
-  // Redirect already-logged-in users (useEffect avoids hooks-order violation)
-  useEffect(() => {
-    if (user) navigate(from, { replace: true });
-  }, [user, from, navigate]);
-
-  // While redirect is pending, render nothing
-  if (user) return null;
+  // Redirect already-logged-in users — Navigate renders synchronously (no blank flash)
+  if (user) return <Navigate to={from} replace />;
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 

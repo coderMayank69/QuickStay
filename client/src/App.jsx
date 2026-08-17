@@ -83,7 +83,7 @@ const App = () => {
         <PWAInstallBanner />
         <PWAUpdatePrompt />
 
-        <div className={`min-h-[70vh] ${!hideShell ? "pt-16" : ""}`}>
+        <div className={`min-h-[70vh] ${!hideShell ? "pt-16 sm:pb-0 pb-24" : ""}`}>
           <Suspense fallback={<PageLoader />}>
             <PageTransition>
               <Routes>
