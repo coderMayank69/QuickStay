@@ -12,7 +12,7 @@ import Booking from '../models/Booking.js';
 import Review  from '../models/Review.js';
 import { ok, fail } from '../utils/respond.js';
 
-const GEMINI_MODEL = 'gemini-1.5-flash';
+const GEMINI_MODEL = 'gemini-3.6-flash';
 
 // ── Lazy-initialised Gemini client ───────────────────────────────
 let _genAI = null;
