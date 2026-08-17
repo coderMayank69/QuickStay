@@ -12,7 +12,8 @@ import Booking from '../models/Booking.js';
 import Review  from '../models/Review.js';
 import { ok, fail } from '../utils/respond.js';
 
-const GEMINI_MODEL = 'gemini-3.6-flash';
+const GEMINI_MODEL          = 'gemini-3.6-flash';
+const GEMINI_MODEL_FALLBACK = 'gemini-3.5-flash-lite'; // used if primary is overloaded
 
 // ── Lazy-initialised Gemini client ───────────────────────────────
 let _genAI = null;
@@ -25,11 +26,24 @@ const getGenAI = () => {
     return _genAI;
 };
 
-const getModel = (systemInstruction) => {
+const getModel = (systemInstruction, useFallback = false) => {
     return getGenAI().getGenerativeModel({
-        model: GEMINI_MODEL,
+        model: useFallback ? GEMINI_MODEL_FALLBACK : GEMINI_MODEL,
         systemInstruction,
     });
+};
+
+// Run with automatic fallback on 503 (model overloaded)
+const geminiRequest = async (systemInstruction, fn) => {
+    try {
+        return await fn(getModel(systemInstruction, false));
+    } catch (err) {
+        if (err.message?.includes('503') || err.message?.includes('high demand')) {
+            console.warn('[AI] Primary model overloaded, trying fallback model');
+            return await fn(getModel(systemInstruction, true));
+        }
+        throw err;
+    }
 };
 
 // ── System prompt — Maya's personality & knowledge ───────────────
@@ -92,17 +106,21 @@ export const aiChat = async (req, res) => {
             } catch (_) {}
         }
 
-        // Map history to Gemini's Content format
-        const geminiHistory = history.slice(-8).map(h => ({
+        // Map history to Gemini Content format.
+        // Gemini requires history to START with role 'user' — drop any leading 'model' entries.
+        const rawHistory = history.slice(-8).map(h => ({
             role:  h.role === 'maya' ? 'model' : 'user',
             parts: [{ text: h.content }],
         }));
+        const firstUserIdx  = rawHistory.findIndex(m => m.role === 'user');
+        const geminiHistory = firstUserIdx > 0 ? rawHistory.slice(firstUserIdx) : rawHistory;
 
-        const model = getModel(systemContext);
-        const chat  = model.startChat({ history: geminiHistory });
+        const reply = await geminiRequest(systemContext, async (model) => {
+            const chat   = model.startChat({ history: geminiHistory });
+            const result = await chat.sendMessage(message.trim());
+            return result.response.text()?.trim() || "I'm having a moment — please try again!";
+        });
 
-        const result = await chat.sendMessage(message.trim());
-        const reply  = result.response.text()?.trim() || "I'm having a moment — please try again!";
         ok(res, { reply, quickReplies: getQuickReplies(message) });
 
     } catch (error) {
@@ -139,13 +157,15 @@ Rules:
 - roomType must exactly match one allowed value or null
 - category must exactly match one allowed value or null`;
 
-        const model  = getModel('You are a JSON-only search parser. Return only valid JSON, no markdown, no explanation.');
-        const result = await model.generateContent(prompt);
-        const raw    = result.response.text()?.trim() || '{}';
-
-        const jsonMatch = raw.match(/\{[\s\S]*\}/);
-        const filters   = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
-
+        const filters = await geminiRequest(
+            'You are a JSON-only search parser. Return only valid JSON, no markdown, no explanation.',
+            async (model) => {
+                const result = await model.generateContent(prompt);
+                const raw    = result.response.text()?.trim() || '{}';
+                const match  = raw.match(/\{[\s\S]*\}/);
+                return match ? JSON.parse(match[0]) : {};
+            }
+        );
         ok(res, { filters });
     } catch (error) {
         console.error('[AI] parse-search error:', error.message);
@@ -172,12 +192,15 @@ export const reviewSummary = async (req, res) => {
 
         const reviewText = reviews.map(r => `Rating: ${r.rating}/5 - "${r.comment}"`).join('\n');
 
-        const model  = getModel('You are a hotel review summarizer. Write clear, concise prose summaries.');
-        const result = await model.generateContent(
-            `Summarize these hotel reviews in 2-3 concise sentences.\nMention what guests love most, any common complaint, and overall sentiment.\nBe specific, not generic. Flowing prose only, no bullet points.\n\nReviews:\n${reviewText}`
+        const summary = await geminiRequest(
+            'You are a hotel review summarizer. Write clear, concise prose summaries.',
+            async (model) => {
+                const result = await model.generateContent(
+                    `Summarize these hotel reviews in 2-3 concise sentences.\nMention what guests love most, any common complaint, and overall sentiment.\nBe specific, not generic. Flowing prose only, no bullet points.\n\nReviews:\n${reviewText}`
+                );
+                return result.response.text()?.trim() || 'Guests have had a great experience at this property.';
+            }
         );
-
-        const summary = result.response.text()?.trim() || 'Guests have had a great experience at this property.';
         summaryCache.set(hotelId, { summary, cachedAt: Date.now() });
         ok(res, { summary, reviewCount: reviews.length });
 

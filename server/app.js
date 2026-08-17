@@ -37,6 +37,7 @@ import aiRouter       from './routes/aiRoutes.js';
 import newsletterRouter from './routes/newsletterRoutes.js';
 
 const app = express();
+app.set('trust proxy', 1); // AWS API Gateway / Lambda sits behind a proxy
 
 // ── CORS origins ──────────────────────────────────────────────────
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'http://localhost:5173').split(',');
