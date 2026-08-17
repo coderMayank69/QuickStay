@@ -1,23 +1,18 @@
 # serverless.yml — AWS Lambda deployment config for YoYo backend
-# Deploy with: npx serverless deploy --stage prod
+# Deploy with: serverless deploy --stage prod
 
 service: yoyo-backend
-
-frameworkVersion: '3'
 
 provider:
   name: aws
   runtime: nodejs22.x
-  region: ap-south-1          # Mumbai — closest to Indian users
+  region: ap-south-1
   stage: ${opt:stage, 'prod'}
-  architecture: arm64          # Graviton2 — 20% cheaper, faster cold starts
+  architecture: arm64
 
-  # Memory & timeout
-  memorySize: 512              # MB — enough for Express + Mongoose + Stripe
-  timeout: 29                  # seconds (API Gateway max = 29s)
+  memorySize: 512
+  timeout: 29
 
-  # Lambda environment variables
-  # Set secrets via: npx serverless --param="MONGODB_URL=..." or AWS SSM
   environment:
     NODE_ENV:              production
     MONGODB_URL:           ${ssm:/yoyo/prod/MONGODB_URL}
@@ -38,7 +33,6 @@ provider:
     GROQ_API_KEY:          ${ssm:/yoyo/prod/GROQ_API_KEY}
     GROQ_API_KEY_2:        ${ssm:/yoyo/prod/GROQ_API_KEY_2}
 
-  # IAM permissions (only SSM read — principle of least privilege)
   iam:
     role:
       statements:
@@ -49,13 +43,11 @@ provider:
           Resource:
             - arn:aws:ssm:ap-south-1:*:parameter/yoyo/prod/*
 
-# ── Lambda function ─────────────────────────────────────────────
 functions:
   api:
-    handler: lambda.handler          # lambda.js → export const handler
+    handler: lambda.handler
     description: YoYo Hotel Booking API
     events:
-      # Catch-all HTTP route — API Gateway HTTP API (v2, cheaper + faster than REST API)
       - httpApi:
           path: /{proxy+}
           method: ANY
@@ -63,12 +55,11 @@ functions:
           path: /
           method: ANY
 
-# ── Packaging ───────────────────────────────────────────────────
 package:
   individually: false
   patterns:
     - '!node_modules/.cache/**'
-    - '!node_modules/aws-sdk/**'     # pre-installed on Lambda runtime
+    - '!node_modules/aws-sdk/**'
     - '!*.test.js'
     - '!**/*.test.js'
     - '!addHotels.js'
@@ -76,13 +67,4 @@ package:
     - '!seedData.js'
     - '!uploadAssets.js'
     - '!ecosystem.config.cjs'
-    - '!.env*'                       # never bundle secrets
-
-# ── Plugins ─────────────────────────────────────────────────────
-plugins:
-  - serverless-offline              # local Lambda emulation (dev only)
-
-custom:
-  serverless-offline:
-    httpPort: 4000
-    lambdaPort: 3002
+    - '!.env*'
