@@ -3,7 +3,6 @@ import { assets, cities } from '../assets/assets';
 import { useAppContext } from '../context/AppContext';
 import toast from 'react-hot-toast';
 import { motion, AnimatePresence } from 'framer-motion';
-import { optimiseImage } from '../utils/cloudinary';
 
 const HotelReg = () => {
   const { setShowHotelReg, axios, getToken, setIsOwner } = useAppContext();
@@ -68,7 +67,7 @@ const HotelReg = () => {
           {/* Left image panel */}
           <div className="hidden md:block w-5/12 shrink-0 relative overflow-hidden">
             <img
-              src={optimiseImage('yoyo/rooms/udaipur_heritage_1', 640)}
+              src="https://images.unsplash.com/photo-1566073771259-6a8506099945?w=640&q=80&auto=format&fit=crop"
               alt="Register Hotel"
               className="w-full h-full object-cover"
             />

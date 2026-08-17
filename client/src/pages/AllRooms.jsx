@@ -125,66 +125,6 @@ const FilterPanel = ({ filters, setFilters, selectedSort, setSelectedSort, onCle
 };
 
 
-// ── City Autocomplete Search Bar ──────────────────────────
-const CitySearchBar = ({ value, onChange, onSearch }) => {
-  const [suggestions, setSuggestions] = useState([]);
-  const [showSug, setShowSug] = useState(false);
-
-  const handleInput = (v) => {
-    onChange(v);
-    if (v.length >= 2) {
-      setSuggestions(CITIES.filter(c => c.toLowerCase().startsWith(v.toLowerCase())).slice(0, 6));
-      setShowSug(true);
-    } else {
-      setShowSug(false);
-    }
-  };
-
-  return (
-    <div className="relative">
-      <div className="flex gap-2">
-        <input
-          value={value}
-          onChange={e => handleInput(e.target.value)}
-          placeholder="Search city…"
-          className="flex-1 rounded-xl px-4 py-2.5 text-sm border outline-none"
-          style={{
-            background: "var(--color-surface-2)",
-            borderColor: "var(--color-border)",
-            color: "var(--color-text-primary)",
-          }}
-          onFocus={e => { e.target.style.borderColor = "var(--color-primary)"; value.length >= 2 && setShowSug(true); }}
-          onBlur={e => { e.target.style.borderColor = "var(--color-border)"; setTimeout(() => setShowSug(false), 150); }}
-          onKeyDown={e => e.key === "Enter" && onSearch()}
-        />
-        <button onClick={onSearch} className="btn-primary px-4 py-2.5 text-sm">Search</button>
-      </div>
-      <AnimatePresence>
-        {showSug && suggestions.length > 0 && (
-          <motion.ul
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -8 }}
-            className="absolute top-full left-0 right-0 mt-1 rounded-xl overflow-hidden z-20"
-            style={{ background: "var(--color-surface-2)", boxShadow: "var(--shadow-lg)", border: "1px solid var(--color-border)" }}>
-            {suggestions.map(c => (
-              <li key={c}>
-                <button className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
-                  style={{ color: "var(--color-text-primary)" }}
-                  onMouseDown={() => { onChange(c); setShowSug(false); onSearch(c); }}>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-3.5 h-3.5" style={{ color: "var(--color-primary)" }}>
-                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/>
-                  </svg>
-                  {c}
-                </button>
-              </li>
-            ))}
-          </motion.ul>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-};
 
 // ── Main Page ─────────────────────────────────────────────
 const AllRooms = () => {
@@ -334,53 +274,6 @@ const AllRooms = () => {
         </button>
       </motion.div>
 
-      {/* ── Search bar ──────────────────────────────────── */}
-      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
-        className="rounded-2xl p-4 mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"
-        style={{ background: "var(--color-surface-2)", boxShadow: "var(--shadow-md)" }}>
-
-        {/* City */}
-        <div className="sm:col-span-2 lg:col-span-1">
-          <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-muted)" }}>Destination</p>
-          <CitySearchBar value={cityInput} onChange={setCityInput} onSearch={handleSearch} />
-        </div>
-
-        {/* Check-In */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-muted)" }}>Check-In</p>
-          <input type="date" min={today} value={checkInDate}
-            onChange={e => setCheckInDate(e.target.value)}
-            className="w-full rounded-xl px-3 py-2.5 text-sm border outline-none"
-            style={{ background: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }} />
-        </div>
-
-        {/* Check-Out */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-muted)" }}>Check-Out</p>
-          <input type="date" min={checkInDate || today} value={checkOutDate}
-            onChange={e => setCheckOutDate(e.target.value)}
-            disabled={!checkInDate}
-            className="w-full rounded-xl px-3 py-2.5 text-sm border outline-none disabled:opacity-50"
-            style={{ background: "var(--color-surface)", borderColor: "var(--color-border)", color: "var(--color-text-primary)" }} />
-        </div>
-
-        {/* Guests */}
-        <div>
-          <p className="text-xs font-bold uppercase tracking-wide mb-1.5" style={{ color: "var(--color-text-muted)" }}>Guests</p>
-          <div className="flex items-center gap-2 rounded-xl px-3 py-2 border"
-            style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}>
-            <button onClick={() => setGuestCount(g => Math.max(1, g - 1))}
-              className="w-6 h-6 rounded-full flex items-center justify-center font-bold"
-              style={{ background: "var(--color-surface-3)", color: "var(--color-text-primary)" }}>−</button>
-            <span className="flex-1 text-center text-sm font-semibold" style={{ color: "var(--color-text-primary)" }}>
-              {guestCount} guest{guestCount > 1 ? "s" : ""}
-            </span>
-            <button onClick={() => setGuestCount(g => Math.min(20, g + 1))}
-              className="w-6 h-6 rounded-full flex items-center justify-center font-bold text-white"
-              style={{ background: "var(--color-primary)" }}>+</button>
-          </div>
-        </div>
-      </motion.div>
 
       {/* Mobile filter toggle */}
       <div className="flex items-center gap-3 mb-5 lg:hidden">

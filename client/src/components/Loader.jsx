@@ -1,37 +1,28 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
 import toast from "react-hot-toast";
-
-const spinnerVariants = {
-  spin: {
-    rotate: 360,
-    transition: { duration: 0.9, repeat: Infinity, ease: "linear" },
-  },
-};
 
 // Loader is used as the Stripe success_url target: /loader/:nextUrl
 // It verifies the payment, marks the booking as paid, then navigates to nextUrl.
 const Loader = () => {
   const { nextUrl } = useParams();
   const { axios, getToken, navigate } = useAppContext();
+  const [status, setStatus] = useState("loading"); // "loading" | "success" | "error"
   const [message, setMessage] = useState("Verifying your payment…");
 
   useEffect(() => {
     const verify = async () => {
-      // The destination path (e.g. "my-bookings")
       const destination = `/${nextUrl || "my-bookings"}`;
 
       try {
         const token = await getToken();
         if (!token) {
-          // Not logged in — just navigate
           navigate(destination, { replace: true });
           return;
         }
 
-        // Get user's bookings to find the most recent unpaid one
         const { data: bookingsData } = await axios.get("/api/bookings/user", {
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -41,7 +32,6 @@ const Loader = () => {
           return;
         }
 
-        // Find the most recent booking that isn't yet paid
         const pendingBooking = bookingsData.bookings
           .filter((b) => !b.isPaid && b.status !== "cancelled")
           .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))[0];
@@ -55,21 +45,24 @@ const Loader = () => {
           );
 
           if (verifyData.success) {
-            setMessage("Payment confirmed! 🎉");
+            setStatus("success");
+            setMessage("Payment confirmed!");
             toast.success("Payment successful! Your booking is confirmed.");
           } else {
+            setStatus("error");
             setMessage("Could not verify payment. Redirecting…");
           }
         } else {
-          setMessage("All done! Redirecting…");
+          setStatus("success");
+          setMessage("All done!");
         }
       } catch {
-        // If anything fails, just go to destination silently
+        setStatus("error");
         setMessage("Redirecting…");
       }
 
-      // Small delay so user sees the success state
-      setTimeout(() => navigate(destination, { replace: true }), 1200);
+      // Show success/error state briefly, then navigate
+      setTimeout(() => navigate(destination, { replace: true }), 1800);
     };
 
     verify();
@@ -77,7 +70,7 @@ const Loader = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
       style={{ background: "var(--color-surface)" }}
     >
       {/* Brand mark */}
@@ -85,7 +78,6 @@ const Loader = () => {
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
-        className="mb-6"
       >
         <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="32" fill="url(#brandGrad)" />
@@ -99,23 +91,92 @@ const Loader = () => {
         </svg>
       </motion.div>
 
-      {/* Spinner ring */}
-      <div className="relative w-12 h-12 mb-4">
-        <motion.div
-          variants={spinnerVariants}
-          animate="spin"
-          className="absolute inset-0 rounded-full border-3 border-transparent"
-          style={{ borderTopColor: "var(--color-primary)", borderRightColor: "var(--color-primary)" }}
-        />
-        <div
-          className="absolute inset-1 rounded-full"
-          style={{ background: "var(--color-surface)" }}
-        />
-      </div>
+      {/* Spinner OR green tick */}
+      <AnimatePresence mode="wait">
+        {status === "loading" && (
+          <motion.div
+            key="spinner"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            className="relative w-14 h-14"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+              className="absolute inset-0 rounded-full border-[3px] border-transparent"
+              style={{ borderTopColor: "var(--color-primary)", borderRightColor: "var(--color-primary)" }}
+            />
+            <div
+              className="absolute inset-1 rounded-full"
+              style={{ background: "var(--color-surface)" }}
+            />
+          </motion.div>
+        )}
 
-      <p className="text-sm font-semibold animate-pulse" style={{ color: "var(--color-primary)" }}>
+        {status === "success" && (
+          <motion.div
+            key="tick"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 12, stiffness: 200 }}
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(52, 199, 89, 0.15)", border: "2px solid #34C759" }}
+          >
+            <motion.svg
+              viewBox="0 0 24 24"
+              fill="none"
+              className="w-8 h-8"
+              initial={{ pathLength: 0 }}
+              animate={{ pathLength: 1 }}
+              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+            >
+              <motion.path
+                d="M5 13l4 4L19 7"
+                stroke="#34C759"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                initial={{ pathLength: 0 }}
+                animate={{ pathLength: 1 }}
+                transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+              />
+            </motion.svg>
+          </motion.div>
+        )}
+
+        {status === "error" && (
+          <motion.div
+            key="error"
+            initial={{ scale: 0, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", damping: 14, stiffness: 200 }}
+            className="w-16 h-16 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(232, 0, 61, 0.12)", border: "2px solid var(--color-primary)" }}
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="w-8 h-8">
+              <path d="M18 6L6 18M6 6l12 12" stroke="#E8003D" strokeWidth="2.5" strokeLinecap="round" />
+            </svg>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Status message */}
+      <motion.p
+        key={message}
+        initial={{ opacity: 0, y: 6 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-sm font-semibold text-center"
+        style={{
+          color: status === "success"
+            ? "#34C759"
+            : status === "error"
+            ? "var(--color-primary)"
+            : "var(--color-primary)",
+        }}
+      >
         {message}
-      </p>
+      </motion.p>
     </div>
   );
 };
