@@ -70,8 +70,8 @@ const Loader = () => {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center gap-6"
-      style={{ background: "var(--color-surface)" }}
+      className="fixed inset-0 flex flex-col items-center justify-center gap-6"
+      style={{ background: "var(--color-surface)", zIndex: 9999 }}
     >
       {/* Brand mark */}
       <motion.div
@@ -79,7 +79,7 @@ const Loader = () => {
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.4, ease: [0.34, 1.56, 0.64, 1] }}
       >
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+        <svg width="72" height="72" viewBox="0 0 64 64" fill="none">
           <circle cx="32" cy="32" r="32" fill="url(#brandGrad)" />
           <defs>
             <linearGradient id="brandGrad" x1="0" y1="0" x2="64" y2="64" gradientUnits="userSpaceOnUse">
@@ -120,16 +120,13 @@ const Loader = () => {
             initial={{ scale: 0, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ type: "spring", damping: 12, stiffness: 200 }}
-            className="w-16 h-16 rounded-full flex items-center justify-center"
-            style={{ background: "rgba(52, 199, 89, 0.15)", border: "2px solid #34C759" }}
+            className="w-24 h-24 rounded-full flex items-center justify-center"
+            style={{ background: "rgba(52, 199, 89, 0.15)", border: "3px solid #34C759" }}
           >
             <motion.svg
               viewBox="0 0 24 24"
               fill="none"
-              className="w-8 h-8"
-              initial={{ pathLength: 0 }}
-              animate={{ pathLength: 1 }}
-              transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
+              className="w-12 h-12"
             >
               <motion.path
                 d="M5 13l4 4L19 7"
