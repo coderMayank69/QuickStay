@@ -25,7 +25,12 @@ const getGenAI = () => {
     return _genAI;
 };
 
-const getModel = () => getGenAI().getGenerativeModel({ model: GEMINI_MODEL });
+const getModel = (systemInstruction) => {
+    return getGenAI().getGenerativeModel({
+        model: GEMINI_MODEL,
+        systemInstruction,
+    });
+};
 
 // ── System prompt — Maya's personality & knowledge ───────────────
 const MAYA_SYSTEM_PROMPT = `You are Maya, YoYo Rooms' friendly AI assistant — like Air India's Tia but for hotels.
@@ -93,11 +98,8 @@ export const aiChat = async (req, res) => {
             parts: [{ text: h.content }],
         }));
 
-        const model = getModel();
-        const chat  = model.startChat({
-            systemInstruction: systemContext,
-            history: geminiHistory,
-        });
+        const model = getModel(systemContext);
+        const chat  = model.startChat({ history: geminiHistory });
 
         const result = await chat.sendMessage(message.trim());
         const reply  = result.response.text()?.trim() || "I'm having a moment — please try again!";
@@ -137,7 +139,7 @@ Rules:
 - roomType must exactly match one allowed value or null
 - category must exactly match one allowed value or null`;
 
-        const model  = getModel();
+        const model  = getModel('You are a JSON-only search parser. Return only valid JSON, no markdown, no explanation.');
         const result = await model.generateContent(prompt);
         const raw    = result.response.text()?.trim() || '{}';
 
@@ -170,7 +172,7 @@ export const reviewSummary = async (req, res) => {
 
         const reviewText = reviews.map(r => `Rating: ${r.rating}/5 - "${r.comment}"`).join('\n');
 
-        const model  = getModel();
+        const model  = getModel('You are a hotel review summarizer. Write clear, concise prose summaries.');
         const result = await model.generateContent(
             `Summarize these hotel reviews in 2-3 concise sentences.\nMention what guests love most, any common complaint, and overall sentiment.\nBe specific, not generic. Flowing prose only, no bullet points.\n\nReviews:\n${reviewText}`
         );
