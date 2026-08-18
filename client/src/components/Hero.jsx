@@ -1,4 +1,4 @@
-﻿import { motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAppContext } from "../context/AppContext";
 
 const CLOUD           = "dgqgzmzed";
@@ -108,7 +108,7 @@ const Hero = () => {
           className="text-lg max-w-lg mb-11 leading-relaxed"
           style={{ color: "rgba(255,255,255,0.68)", textShadow: "0 1px 14px rgba(0,0,0,0.55)" }}
         >
-          Budget to luxury � 10,000+ verified hotels across India.
+          Budget to luxury · 10,000+ verified hotels across India.
           Use the search bar above to find your ideal stay.
         </motion.p>
 

@@ -136,7 +136,7 @@ const MayaChatbot = () => {
   return (
     <>
       {/* ── Floating trigger button ─────────────────────────────── */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">
+      <div className="fixed bottom-20 md:bottom-6 right-4 md:right-6 z-50 flex flex-col items-end gap-2">
 
         {/* "Need help?" bubble */}
         <AnimatePresence>
@@ -180,7 +180,7 @@ const MayaChatbot = () => {
             animate={{ opacity: 1, y: 0,  scale: 1 }}
             exit={{ opacity: 0, y: 24, scale: 0.94 }}
             transition={{ type: 'spring', stiffness: 340, damping: 28 }}
-            className="fixed bottom-28 right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden flex flex-col"
+            className="fixed bottom-36 md:bottom-28 right-4 md:right-6 z-50 w-[360px] max-w-[calc(100vw-2rem)] rounded-2xl overflow-hidden flex flex-col"
             style={{
               height: '520px',
               background: 'var(--color-surface-2)',
