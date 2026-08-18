@@ -1,393 +1,323 @@
-<p align="center">
-  <img src="client/public/favicon.svg" alt="YoYo Logo" width="80" height="80" />
-</p>
+﻿# YoYo Rooms - Hotel Booking Platform
 
-<h1 align="center">YoYo — Hotel Booking Platform</h1>
+**Production-grade full-stack hotel booking platform - MERN + AWS Lambda + Gemini AI**
 
-<p align="center">
-  <strong>A full-stack hotel booking platform built with the MERN stack</strong>
-</p>
+[Live Demo](https://yoyo.mayankcodes.dev) | [Repository](https://github.com/mayankcodes-dev/YOYO) | [Getting Started](#getting-started) | [API Reference](#api-reference) | [Deployment](#deployment)
 
-<p align="center">
-  <a href="https://quick-stay-chi-two.vercel.app/" target="_blank">🌐 Live Demo</a> &nbsp;·&nbsp;
-  <a href="#-getting-started">🚀 Getting Started</a> &nbsp;·&nbsp;
-  <a href="#-mobile-app">📱 Mobile App</a> &nbsp;·&nbsp;
-  <a href="#-api-reference">📡 API Reference</a>
-</p>
-
-<p align="center">
-  <img src="https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white" alt="Express" />
-  <img src="https://img.shields.io/badge/MongoDB-Mongoose-47A248?logo=mongodb&logoColor=white" alt="MongoDB" />
-  <img src="https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white" alt="Stripe" />
-  <img src="https://img.shields.io/badge/JWT-Auth-F7B731?logo=jsonwebtokens&logoColor=white" alt="JWT" />
-  <img src="https://img.shields.io/badge/Cloudinary-Images-3448C5?logo=cloudinary&logoColor=white" alt="Cloudinary" />
-</p>
+![Live](https://img.shields.io/badge/Live-yoyo.mayankcodes.dev-E8003D?style=flat-square)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white&style=flat-square)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white&style=flat-square)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?logo=mongodb&logoColor=white&style=flat-square)
+![AWS Lambda](https://img.shields.io/badge/AWS-Lambda-FF9900?logo=awslambda&logoColor=white&style=flat-square)
+![Stripe](https://img.shields.io/badge/Stripe-Payments-635BFF?logo=stripe&logoColor=white&style=flat-square)
+![Gemini AI](https://img.shields.io/badge/Gemini-AI-4285F4?logo=google&logoColor=white&style=flat-square)
 
 ---
 
-## 📋 Overview
+## Live Links
 
-YoYo provides two distinct user experiences:
-
-| 🧳 **Travelers** | 🏨 **Hotel Owners** |
-|---|---|
-| Search & filter rooms by city, type, and price | Register a hotel and manage listings |
-| Check real-time availability by date range | Upload up to **5 room images** to Cloudinary |
-| Book rooms with dynamic pricing | Toggle room availability instantly |
-| Pay via Stripe or at the hotel | Track bookings & revenue on a dashboard |
-| Receive email confirmations | View guest details and payment status |
+| Resource | URL |
+|----------|-----|
+| **Frontend** (Vercel) | [yoyo.mayankcodes.dev](https://yoyo.mayankcodes.dev) |
+| **Backend API** (AWS Lambda) | [mcr5117577.execute-api.ap-south-1.amazonaws.com](https://mcr5117577.execute-api.ap-south-1.amazonaws.com) |
+| **GitHub Repo** | [github.com/mayankcodes-dev/YOYO](https://github.com/mayankcodes-dev/YOYO) |
 
 ---
 
-## 📱 Mobile App
+## Overview
 
-YoYo is also available as a **Progressive Web App (PWA)** — install it directly from the browser:
+YoYo Rooms is an OYO-inspired hotel booking platform for India with two distinct portals:
 
-| Platform | Link |
-|----------|------|
-| 🌐 **Web / PWA (Android & iOS)** | [Install from Live Site](https://quick-stay-chi-two.vercel.app/) |
-| 🤖 **Android** | Open the site in Chrome → tap ⋮ → **Add to Home Screen** |
-| 🍎 **iOS** | Open the site in Safari → tap Share → **Add to Home Screen** |
-
-> The app works offline for browsing, is installable on all devices, and syncs automatically when reconnected.
-
----
-
-## ✨ Key Features
-
-- **🔐 Auth** — JWT-based authentication with Google OAuth & email/password login
-- **🔍 Smart Search** — Filter by destination, room type, price range, and sort order
-- **📅 Availability Engine** — Real-time date-range overlap detection prevents double-bookings
-- **💳 Stripe Integration** — Full checkout flow with webhook-based payment verification
-- **📧 Email Notifications** — Booking confirmations sent via SMTP (Brevo)
-- **☁️ Image Hosting** — Up to **5 images** per room, stored on Cloudinary
-- **📊 Owner Dashboard** — Live metrics for total bookings and revenue
-- **📱 PWA / Mobile-First** — Installable app, offline-ready, responsive on all screen sizes
-- **🏨 10,000+ Hotels** — Seeded across 100+ Indian cities with a built-in seed script
-- **🤖 Maya AI Chatbot** — Concierge chatbot to help guests with bookings
+| Travelers | Hotel Owners |
+|-----------|-------------|
+| Search and filter 10,000+ rooms by city, type, and price | Register a hotel and manage room listings |
+| Real-time date-range availability checking | Upload up to 5 room images via Cloudinary |
+| Book rooms with dynamic pricing (GST + service fee) | Toggle room availability instantly |
+| Pay via Stripe checkout or at the hotel | Revenue dashboard with booking analytics |
+| Email booking confirmations | View guest details and payment status |
+| Chat with Maya - AI concierge | |
 
 ---
 
-## 🏗️ Architecture
+## Features
+
+- **Auth** - JWT sessions, Google OAuth, bcrypt + pepper password hashing
+- **Maya AI Chatbot** - Google Gemini 3.6 Flash with multi-turn conversation history and auto-fallback to gemini-3.5-flash-lite on 503 errors
+- **Smart Search** - NLP query parsing converts natural language into structured room filters
+- **Availability Engine** - Date-range overlap detection prevents double-bookings
+- **Stripe Integration** - Hosted checkout with webhook-based payment verification
+- **Email Notifications** - Booking confirmations via Brevo SMTP with HTML templates
+- **Image Hosting** - Up to 5 images per room on Cloudinary with auto-optimization
+- **Owner Dashboard** - Live revenue metrics, booking analytics, and room management
+- **PWA** - Installable as a home-screen app, offline-ready, responsive on all devices
+- **Reviews and Ratings** - Per-hotel review system
+- **Coupon System** - Discount codes with server-side validation
+- **10,000+ Hotels** - Seeded across 200+ Indian cities
+
+---
+
+## Architecture
+
+```
+Browser / PWA  (yoyo.mayankcodes.dev on Vercel)
+React 19 + Vite + Tailwind CSS v4
+         |
+         | HTTPS via axios
+         v
+AWS API Gateway HTTP API v2
+mcr5117577.execute-api.ap-south-1.amazonaws.com
+         |
+         v
+AWS Lambda  Node 22  arm64 Graviton  ap-south-1
+serverless-http wrapping Express 5
+Secrets via AWS SSM Parameter Store
+    |         |          |          |
+    v         v          v          v
+MongoDB   Cloudinary  Stripe   Google Gemini
+ Atlas    (images)  (payments) (Maya AI)
+```
+
+### Project Structure
 
 ```
 YOYO/
-├── client/                  # React + Vite frontend (PWA)
-│   ├── public/              # Static assets, PWA icons, maya.png
-│   ├── src/
-│   │   ├── assets/          # Images, icons, dummy data
-│   │   ├── components/      # Reusable UI components
-│   │   ├── context/         # Global state (AppContext + JWT auth)
-│   │   └── pages/           # Route pages
-│   │       ├── hotelOwner/  # Owner dashboard pages
-│   │       └── admin/       # Admin panel pages
-│   └── .env                 # Client environment config
-│
-├── server/                  # Express API backend
-│   ├── configs/             # DB & Cloudinary setup
-│   ├── controllers/         # Business logic
-│   ├── middleware/           # JWT auth middleware
-│   ├── models/              # Mongoose schemas
-│   ├── routes/              # API route definitions
-│   └── .env                 # Server environment config
-│
-├── addHotels.js             # 🌱 Seed script — adds 100 hotels to MongoDB
-└── package.json             # Root deployment scripts
+|-- client/                 React + Vite PWA  (Vercel)
+|   |-- public/             Static assets, PWA icons, maya.png
+|   |-- src/
+|   |   |-- components/     Navbar, Hero, MayaChatbot, ...
+|   |   |-- context/        AppContext - global state, axios, auth
+|   |   |-- pages/
+|   |   |   |-- hotelOwner/ Owner dashboard pages
+|   |   |   -- admin/      Admin panel
+|   |-- .env                Local dev vars (gitignored)
+|   |-- .env.production     Production vars baked into bundle (committed)
+|   -- vercel.json         SPA rewrite rules
+|
+|-- server/                 Express API  (AWS Lambda)
+|   |-- configs/            MongoDB + Cloudinary init
+|   |-- controllers/        Business logic
+|   |-- middleware/         JWT protect, multer, rate-limit
+|   |-- models/             Mongoose schemas
+|   |-- routes/             API routes
+|   |-- lambda.js           serverless-http Lambda handler
+|   |-- serverless.yml      Serverless Framework config
+|   -- .env                Local secrets (prod uses SSM)
+|
+|-- addHotels.js            Seed script - 10,000 hotels
+-- README.md
 ```
 
 ---
 
-## 🛠️ Tech Stack
+## Tech Stack
 
-<table>
-<tr>
-<td><strong>Frontend</strong></td>
-<td><strong>Backend</strong></td>
-<td><strong>Services</strong></td>
-</tr>
-<tr>
-<td>
-
-- React 19
-- React Router 7
-- Tailwind CSS v4
-- GSAP Animations
-- Framer Motion
-- Axios
-- react-hot-toast
-
-</td>
-<td>
-
-- Express 5
-- Mongoose 8
-- Multer 2 (image uploads)
-- Nodemailer 7
-- jsonwebtoken
-- bcryptjs
-
-</td>
-<td>
-
-- **Auth**: JWT + Google OAuth
-- **Payments**: Stripe
-- **Images**: Cloudinary
-- **Email**: Brevo SMTP
-- **Database**: MongoDB Atlas
-- **Hosting**: Vercel
-
-</td>
-</tr>
-</table>
+| Layer | Technology |
+|-------|-----------|
+| **Frontend** | React 19, React Router 7, Tailwind CSS v4, Framer Motion, GSAP, Axios, Vite PWA |
+| **Backend** | Express 5, Mongoose 8, serverless-http, Multer 2, Nodemailer 7, jsonwebtoken, bcryptjs |
+| **Infrastructure** | Vercel (frontend), AWS Lambda arm64, AWS API Gateway v2, AWS SSM, ap-south-1 |
+| **AI** | Google Gemini 3.6 Flash (chatbot + NLP search), fallback to gemini-3.5-flash-lite on 503 |
+| **Auth** | JWT access + refresh tokens, Google OAuth 2.0, bcrypt + server-side pepper |
+| **Payments** | Stripe Checkout + webhook verification |
+| **Images** | Cloudinary with auto-optimization, up to 5 images per room |
+| **Email** | Brevo SMTP with HTML booking confirmation templates |
+| **Database** | MongoDB Atlas with Mongoose 8 |
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 18+
-- MongoDB Atlas cluster (or local MongoDB)
-- Accounts on: [Stripe](https://stripe.com), [Cloudinary](https://cloudinary.com), [Google Cloud Console](https://console.cloud.google.com)
+- Node.js 20+
+- MongoDB Atlas cluster
+- Accounts: Stripe, Cloudinary, Google Cloud Console, Google AI Studio
 
-### 1. Clone the repository
+### 1. Clone
 
 ```bash
-git clone https://github.com/coderMayank69/YoYo.git
+git clone https://github.com/mayankcodes-dev/YOYO.git
 cd YOYO
 ```
 
-### 2. Set up environment variables
+### 2. Environment Variables
 
-**`client/.env`**
+**client/.env** (local dev only - gitignored)
 
 ```env
 VITE_BACKEND_URL=http://localhost:4000
-VITE_CURRENCY=₹
+VITE_CURRENCY=INR
 VITE_GOOGLE_CLIENT_ID=your_google_client_id
 ```
 
-**`server/.env`**
+**server/.env** (local dev only - production uses AWS SSM)
 
 ```env
 PORT=4000
-MONGODB_URI=your_mongodb_connection_string
-
-# JWT
-JWT_SECRET=your_super_secret_jwt_key
-
-# Google OAuth
+NODE_ENV=development
+MONGODB_URL=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+PASSWORD_PEPPER=your_bcrypt_pepper
 GOOGLE_CLIENT_ID=your_google_client_id
-
-# Cloudinary
+ALLOWED_ORIGINS=http://localhost:5173
 CLOUDINARY_CLOUD_NAME=your_cloud_name
 CLOUDINARY_API_KEY=your_api_key
 CLOUDINARY_API_SECRET=your_api_secret
-
-# SMTP (Brevo)
+SENDER_EMAIL=your_email
 SMTP_USER=your_smtp_user
-SMTP_PASS=your_smtp_password
-SENDER_EMAIL=your_sender_email
-
-# Stripe
-STRIPE_SECRET_KEY=your_stripe_secret_key
-STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
+SMTP_PASS=your_smtp_pass
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+GEMINI_API_KEY=your_gemini_api_key
 ```
 
-### 3. Install dependencies
+### 3. Install and Run
 
 ```bash
-# Install client dependencies
-cd client && npm install
+# Backend on port 4000
+cd server && npm install && npm run server
 
-# Install server dependencies
-cd ../server && npm install
+# Frontend on port 5173
+cd client && npm install && npm run dev
 ```
 
-### 4. Seed the database (optional)
+### 4. Seed Database (optional)
 
 ```bash
-# From the root YOYO/ folder — adds 100 hotels across Indian cities
-node addHotels.js
+node addHotels.js    # adds 10,000 hotels across 200+ Indian cities
 ```
-
-### 5. Run the development servers
-
-```bash
-# Terminal 1 — Backend (port 4000)
-cd server
-npm run server
-
-# Terminal 2 — Frontend (port 5173)
-cd client
-npm run dev
-```
-
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:5173 |
-| Backend API | http://localhost:4000 |
 
 ---
 
-## 🌱 Hotel Seed Script
+## API Reference
 
-The `addHotels.js` script in the project root seeds **100 hotels** across 80+ Indian cities into MongoDB.
+**Base URL**: https://mcr5117577.execute-api.ap-south-1.amazonaws.com
 
-```bash
-# Run from root YOYO/ folder
-node addHotels.js
-```
+Protected routes require: Authorization: Bearer <token>
 
-**Features:**
-- Skips hotels that already exist (safe to re-run)
-- Each hotel gets exactly **1 room** with **1 image**
-- Rooms support up to **5 images** when listed via the Owner Portal
-- Covers Port Blair → Gangtok → Gulmarg → Kanyakumari
-
----
-
-## 📡 API Reference
-
-> All protected routes require a JWT Bearer token in the `Authorization` header.
-
-### 👤 Auth
+### Auth
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/auth/register` | ❌ | Register with email & password |
-| `POST` | `/api/auth/login` | ❌ | Login — returns JWT |
-| `POST` | `/api/auth/google` | ❌ | Google OAuth login |
-| `GET`  | `/api/auth/me` | ✅ | Get current user profile |
+| POST | /api/auth/register | No | Register with email and password |
+| POST | /api/auth/login | No | Login - returns JWT |
+| POST | /api/auth/google | No | Google OAuth token exchange |
+| GET | /api/auth/me | Yes | Current user profile |
+| POST | /api/auth/refresh | No | Refresh access token |
 
-### 👤 Users
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/api/user` | ✅ | Get current user profile & recent searches |
-| `POST` | `/api/user/store-recent-search` | ✅ | Save a recently searched city |
-
-### 🏨 Hotels
+### Rooms and Hotels
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/hotels` | ✅ | Register as hotel owner & create hotel |
+| GET | /api/rooms | No | List rooms (filterable by city, type, price) |
+| POST | /api/rooms | Yes | Create room with up to 5 image uploads |
+| GET | /api/rooms/owner | Yes | Owner room listings |
+| POST | /api/rooms/toggle-availability | Yes | Toggle room visibility |
+| POST | /api/hotels | Yes | Register hotel and become owner |
 
-### 🛏️ Rooms
-
-| Method | Endpoint | Auth | Description |
-|--------|----------|------|-------------|
-| `GET` | `/api/rooms` | ❌ | List all available rooms |
-| `POST` | `/api/rooms` | ✅ | Create room with up to 5 image uploads |
-| `GET` | `/api/rooms/owner` | ✅ | Get rooms for current owner |
-| `POST` | `/api/rooms/toggle-availability` | ✅ | Toggle room availability |
-
-### 📋 Bookings
+### Bookings
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| `POST` | `/api/bookings/check-availability` | ❌ | Check room availability for dates |
-| `POST` | `/api/bookings/book` | ✅ | Create a new booking |
-| `GET` | `/api/bookings/user` | ✅ | Get current user's bookings |
-| `GET` | `/api/bookings/hotel` | ✅ | Get owner's bookings & dashboard data |
-| `POST` | `/api/bookings/stripe-payment` | ✅ | Create Stripe checkout session |
-| `POST` | `/api/bookings/verify-payment` | ✅ | Verify payment & update booking |
+| POST | /api/bookings/check-availability | No | Check date range overlap |
+| POST | /api/bookings/book | Yes | Create booking |
+| GET | /api/bookings/user | Yes | User booking history |
+| GET | /api/bookings/hotel | Yes | Owner bookings and revenue |
+| POST | /api/bookings/stripe-payment | Yes | Create Stripe checkout session |
 
-### 🔗 Webhooks
+### AI - Maya Chatbot
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `POST` | `/stripe` | Stripe payment events |
+| POST | /api/ai/chat | Multi-turn chat with Gemini 3.6 Flash |
+| POST | /api/ai/parse-search | Natural language to structured room filters |
+
+### Webhooks
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /stripe | Stripe payment events (raw body required) |
 
 ---
 
-## 💳 Booking & Payment Flow
-
-```
-┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Select Room │────▶│  Check Dates │────▶│ Create      │
-│  & Dates     │     │  Availability│     │ Booking     │
-└─────────────┘     └──────────────┘     └──────┬──────┘
-                                                │
-                    ┌──────────────────────────┐ │
-                    │                          ▼ │
-              ┌─────┴──────┐          ┌─────────────────┐
-              │ Pay at Hotel│          │ Stripe Checkout  │
-              │ (isPaid:    │          │ Session Created  │
-              │  false)     │          └────────┬────────┘
-              └────────────┘                   │
-                                               ▼
-                                    ┌─────────────────┐
-                                    │ Webhook confirms │
-                                    │ payment & updates│
-                                    │ booking status   │
-                                    └────────┬────────┘
-                                             │
-                                             ▼
-                                    ┌─────────────────┐
-                                    │ Email confirm    │
-                                    │ sent to guest    │
-                                    └─────────────────┘
-```
-
----
-
-## 🗄️ Data Models
-
-### Room
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `hotel` | Ref → Hotel | Associated hotel |
-| `roomType` | String | Single / Double / Family Suite / Luxury |
-| `pricePerNight` | Number | Price in INR |
-| `amenities` | [String] | List of included amenities |
-| `images` | [String] | 1–5 Cloudinary URLs |
-| `isAvailable` | Boolean | Listing visibility |
+## Data Models
 
 ### Booking
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `user` | Ref → User | Guest |
-| `room` | Ref → Room | Booked room |
-| `hotel` | Ref → Hotel | Associated hotel |
-| `checkInDate` | Date | Check-in date |
-| `checkOutDate` | Date | Check-out date |
-| `totalPrice` | Number | Calculated total |
-| `guests` | Number | Guest count |
-| `status` | Enum | `pending` \| `confirmed` \| `cancelled` |
-| `paymentMethod` | String | Stripe \| Pay At Hotel |
-| `isPaid` | Boolean | Payment status |
+| Field | Type | Notes |
+|-------|------|-------|
+| user | Ref to User | Guest |
+| room | Ref to Room | Booked room |
+| hotel | Ref to Hotel | Property |
+| checkInDate | Date | |
+| checkOutDate | Date | |
+| totalPrice | Number | Includes GST and service fee |
+| guests | Number | Guest count |
+| status | Enum | pending, confirmed, cancelled |
+| paymentMethod | String | Stripe or Pay At Hotel |
+| isPaid | Boolean | Payment confirmed by webhook |
+
+### Room
+
+| Field | Type | Notes |
+|-------|------|-------|
+| hotel | Ref to Hotel | Associated hotel |
+| roomType | String | Single, Double, Suite, Deluxe |
+| pricePerNight | Number | INR |
+| amenities | Array | Wi-Fi, Pool, Gym, AC, etc |
+| images | Array | 1 to 5 Cloudinary CDN URLs |
+| isAvailable | Boolean | Controls listing visibility |
+| category | String | Budget, Standard, Luxury |
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
-The project is configured for **Vercel** with separate deployments for frontend and backend:
+### Frontend - Vercel
 
-1. **Frontend** — Deploy the `client/` directory as a Vite static site
-2. **Backend** — Deploy the `server/` directory as a Node.js serverless function
+```
+Root directory:  client/
+Build command:   npm run build
+Output dir:      dist/
+```
 
-Set `VITE_BACKEND_URL` in the client's Vercel environment to point to the deployed backend URL.
+client/.env.production is committed to git. It contains public VITE_ vars that Vite bakes into the JS bundle at build time:
+
+```
+VITE_BACKEND_URL=https://mcr5117577.execute-api.ap-south-1.amazonaws.com
+```
+
+### Backend - AWS Lambda via Serverless Framework
+
+```bash
+cd server
+npm install -g serverless@3
+serverless deploy --stage prod
+```
+
+All secrets live in AWS SSM Parameter Store under /yoyo/prod/ and are never in source code. The Express app is wrapped with serverless-http in lambda.js enabling zero-change Lambda deployment.
+
+**Lambda configuration:**
+- Runtime: Node.js 22, arm64 Graviton (40% cheaper than x86)
+- Memory: 512 MB
+- Timeout: 29 seconds
+- Region: ap-south-1 Mumbai for lowest latency in India
 
 ---
 
-## 📜 Available Scripts
+## Scripts
 
-| Location | Script | Command |
-|----------|--------|---------|
-| Root | Add 100 hotels to DB | `node addHotels.js` |
-| Client | Dev server | `npm run dev` |
-| Client | Production build | `npm run build` |
-| Client | Preview build | `npm run preview` |
-| Client | Lint | `npm run lint` |
-| Server | Dev (nodemon) | `npm run server` |
-| Server | Production | `npm run start` |
+| Location | Command | Description |
+|----------|---------|-------------|
+| Root | node addHotels.js | Seed 10,000 hotels into MongoDB |
+| Client | npm run dev | Vite dev server on port 5173 |
+| Client | npm run build | Production build |
+| Client | npm run lint | ESLint |
+| Server | npm run server | nodemon dev server on port 4000 |
+| Server | npm start | Production start |
+| Server | serverless deploy --stage prod | Deploy to AWS Lambda |
 
 ---
 
-<p align="center">
-  Built with ❤️ by <a href="https://mayankcodes.dev" target="_blank" rel="noopener noreferrer">Mayank Singh</a>
-</p>
+Built with love by [Mayank Singh](https://mayankcodes.dev)
